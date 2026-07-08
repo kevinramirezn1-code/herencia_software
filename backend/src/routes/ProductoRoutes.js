@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { createProductValidation, updateProductValidation, deleteProductValidation } from '../validations/ProductoValidations.js';
 import { validarCampos } from '../middleware/validarCampos.js';
+import { verificarToken } from '../middleware/authMiddleware.js';
 import productoController from '../controllers/ProductoController.js';
 
 const router = Router();
 
 // HU-INV-01: Registrar producto
-// Orden de la cadena: 1) reglas de formato -> 2) revisar si hubo errores -> 3) controller
 router.post(
   '/',
+  verificarToken,
   createProductValidation,
   validarCampos,
   productoController.registrarProducto
@@ -17,6 +18,7 @@ router.post(
 // HU-INV-02: Actualizar producto
 router.put(
   '/:id',
+  verificarToken,
   updateProductValidation,
   validarCampos,
   productoController.actualizarProducto
@@ -25,6 +27,7 @@ router.put(
 // HU-INV-03: Eliminar producto
 router.delete(
   '/:id',
+  verificarToken,
   deleteProductValidation,
   validarCampos,
   productoController.eliminarProducto
