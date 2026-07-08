@@ -44,4 +44,9 @@ response 400
         }
     ]
 }
+response 409
+{
+    "success": false,
+    "message": "El código del producto ya existe."
+}
 }
