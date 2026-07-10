@@ -2,6 +2,7 @@ import express from 'express';
 import cors from "cors";
 import productoRoutes from './routes/ProductoRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import ingresoMercanciaRoutes from "./routes/IngresoMercancia.routes.js";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(cors({
 
 // Rutas de la API
 app.use('/api/productos', productoRoutes);
+app.use('/api/ingreso-mercancia', ingresoMercanciaRoutes);
 
 //este es el middleware de manejo de errores global bro
 app.use(errorHandler);

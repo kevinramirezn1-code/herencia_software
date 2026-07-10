@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createProductValidation, updateProductValidation, deleteProductValidation } from '../validations/ProductoValidations.js';
-import { validarCampos } from '../middleware/validarCampos.js';
+import { validarCampos } from '../middleware/validarCampos.middleware.js';
 import productoController from '../controllers/ProductoController.js';
 
 const router = Router();
