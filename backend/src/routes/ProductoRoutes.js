@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { createProductValidation, updateProductValidation, deleteProductValidation } from '../validations/ProductoValidations.js';
 import { validarCampos } from '../middleware/validarCampos.middleware.js';
-import { validarCampos } from '../middleware/validarCampos.js';
 import { verificarToken } from '../middleware/authMiddleware.js';
 import productoController from '../controllers/ProductoController.js';
 

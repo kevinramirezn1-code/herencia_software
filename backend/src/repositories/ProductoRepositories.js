@@ -3,19 +3,18 @@ import Categoria from '../models/CategoriesModels.js';
 
 class ProductoRepository {
 
-  // HU-INV-01: Registrar producto
   async crear(datosProducto) {
     return await Producto.create(datosProducto);
   }
 
-  // Util para validar duplicados antes de crear (lo usara el service)
   async obtenerPorCodigo(codigo_producto) {
     return await Producto.findOne({ where: { codigo_producto } });
   }
 
-  async obtenerPorId(id_producto) {
+  async obtenerPorId(id_producto, options = {}) {
     return await Producto.findByPk(id_producto, {
-      include: { model: Categoria, as: 'categoria' }
+      include: { model: Categoria, as: 'categoria' },
+      ...options
     });
   }
 
@@ -25,23 +24,34 @@ class ProductoRepository {
     });
   }
 
-  // HU-INV-02: Actualizar producto
   async actualizar(id_producto, datosActualizados) {
     const producto = await Producto.findByPk(id_producto);
     if (!producto) return null;
-
     return await producto.update(datosActualizados);
   }
 
-  // HU-INV-03: Eliminar producto (soft delete gracias a "paranoid" en el modelo)
   async eliminar(id_producto) {
     const producto = await Producto.findByPk(id_producto);
     if (!producto) return null;
-
     await producto.destroy();
     return producto;
   }
+
+  // Se mantiene por si ya se usa en otras funcionalidades (ej. ajuste manual de stock)
+  async actualizarStock(id_producto, nuevoStock, transaction = null) {
+    return await Producto.update({ stock: nuevoStock }, { where: { id_producto }, transaction });
+  }
+
+  // Nuevo: usado por Ingreso de mercancía (suma stock de forma atómica)
+  async incrementarStock(id_producto, cantidad, transaction = null) {
+    return await Producto.increment("stock", { by: cantidad, where: { id_producto }, transaction });
+  }
+
+  // Nuevo: usado por Salida de mercancía (resta stock de forma atómica)
+  async decrementarStock(id_producto, cantidad, transaction = null) {
+    return await Producto.decrement("stock", { by: cantidad, where: { id_producto }, transaction });
+  }
+
 }
 
-// Se exporta una unica instancia (singleton): toda la app comparte el mismo repository
 export default new ProductoRepository();
