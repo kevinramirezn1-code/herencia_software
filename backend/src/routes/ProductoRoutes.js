@@ -6,6 +6,36 @@ import productoController from '../controllers/ProductoController.js';
 
 const router = Router();
 
+// ============================================
+// HU-INV-006: Consultar existencias
+// (rutas específicas van ANTES de /:id para que Express no las confunda)
+// ============================================
+
+router.get(
+  '/con-stock',
+  productoController.listarProductosConStock
+);
+
+router.get(
+  '/sin-stock',
+  productoController.listarProductosSinStock
+);
+
+router.get(
+  '/stock-bajo',
+  productoController.listarProductosStockBajo
+);
+
+router.get(
+  '/codigo/:codigo',
+  productoController.obtenerProductoPorCodigo
+);
+
+router.get(
+  '/',
+  productoController.listarProductos
+);
+
 // HU-INV-01: Registrar producto
 router.post(
   '/',

@@ -1,4 +1,4 @@
-import { body, param } from "express-validator";
+import { body, param, query } from "express-validator";
 
 export const createProductValidation = [
 
@@ -44,4 +44,22 @@ export const updateProductValidation = [
 // Solo se valida el id que viene en la URL, no hay body que revisar
 export const deleteProductValidation = [
     param('id').isInt({ min: 1 }).withMessage('El id del producto debe ser un número entero válido.'),
+];
+
+// ============================================
+// HU-INV-006: Consultar existencias
+// ============================================
+
+export const obtenerPorCodigoValidation = [
+    param('codigo').notEmpty().withMessage('El código de producto es obligatorio.'),
+];
+
+export const obtenerPorIdValidation = [
+    param('id').isInt({ min: 1 }).withMessage('El id del producto debe ser un número entero válido.'),
+];
+
+export const stockBajoValidation = [
+    query('umbral')
+        .optional()
+        .isInt({ min: 0 }).withMessage('El campo umbral debe ser un número entero mayor o igual a 0.'),
 ];

@@ -124,5 +124,23 @@ class ProductoService {
     const productoEliminado = await productoRepository.eliminar(id_producto);
     return productoEliminado;
   }
+
+  // HU-INV-006 consultar existencias
+  async obtenerPorCodigo(codigo_producto) {
+    return await productoRepository.obtenerPorCodigo(codigo_producto);
+  }
+  async obtenerTodos() {
+    return await productoRepository.obtenerTodos();
+  }
+  async obtenerProductosConStock() {
+    return await productoRepository.obtenerProductosConStock();
+  }
+  async obtenerProductosSinStock() {
+    return await productoRepository.obtenerProductosSinStock();
+  }
+    async obtenerProductosConStockBajo(umbral){
+      return await productoRepository.obtenerProductosConStockBajo(umbral);
+  }
+
 }
 export default new ProductoService();
