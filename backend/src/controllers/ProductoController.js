@@ -162,6 +162,28 @@ class ProductoController {
       next(error);
     }
   }
+
+// ============================================
+// HU-INV-007: Consultar productos próximos a vencer
+// ============================================
+
+  async obtenerProductosProximosAVencer(req, res, next) {
+    try {
+
+        const dias = Number(req.query.dias) || 30;
+
+        const productos = await productoService.obtenerProductosProximosAVencer(dias);
+
+        return res.status(200).json({
+            success: true,
+            total: productos.length,
+            data: productos
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
 }
 
 export default new ProductoController();

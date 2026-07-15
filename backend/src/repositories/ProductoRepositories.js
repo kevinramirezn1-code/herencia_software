@@ -74,13 +74,38 @@ class ProductoRepository {
     });
   }
 
-  // Obtener productos con stock bajo (stock <= umbral, por defecto 10)
-  async obtenerProductosConStockBajo(umbral = 10) {
+  // Obtener productos con stock bajo (stock <= umbral, por defecto 15)
+  async obtenerProductosConStockBajo(umbral = 15) {
     return await Producto.findAll({
       where: { stock: { [Op.lte]: umbral } },
       include: { model: Categoria, as: 'categoria' }
     });
   }
+
+  async obtenerProductosProximosAVencer(dias = 30) {
+
+    const hoy = new Date();
+    const fechaActual = hoy.toISOString().split("T")[0];
+
+    const limite = new Date();
+    limite.setDate(limite.getDate() + dias);
+    const fechaLimite = limite.toISOString().split("T")[0];
+
+    console.log("Fecha actual:", fechaActual);
+    console.log("Fecha límite:", fechaLimite);
+
+    return await Producto.findAll({
+        where: {
+            fecha_vencimiento: {
+                [Op.between]: [fechaActual, fechaLimite]
+            }
+        },
+        include: {
+            model: Categoria,
+            as: "categoria"
+        }
+    });
+}
 }
 
 export default new ProductoRepository();

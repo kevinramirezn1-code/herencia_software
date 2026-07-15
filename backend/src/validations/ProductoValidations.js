@@ -63,3 +63,13 @@ export const stockBajoValidation = [
         .optional()
         .isInt({ min: 0 }).withMessage('El campo umbral debe ser un número entero mayor o igual a 0.'),
 ];
+
+// ============================================
+// HU-INV-007: Constrolar stock minimo
+// ============================================
+
+export const obtenerProductosProximosAVencer = [
+    query('dias')
+        .optional()
+        .isInt({ min: 1 }).withMessage('El campo dias debe ser un número entero mayor a 0.'),
+];

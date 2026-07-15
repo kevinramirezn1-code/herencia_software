@@ -141,6 +141,9 @@ class ProductoService {
     async obtenerProductosConStockBajo(umbral){
       return await productoRepository.obtenerProductosConStockBajo(umbral);
   }
+  async obtenerProductosProximosAVencer(dias) {
+    return await productoRepository.obtenerProductosProximosAVencer(dias);
+  }
 
 }
 export default new ProductoService();

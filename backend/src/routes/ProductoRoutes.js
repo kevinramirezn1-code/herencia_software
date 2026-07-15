@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createProductValidation, updateProductValidation, deleteProductValidation } from '../validations/ProductoValidations.js';
+import { createProductValidation, updateProductValidation, deleteProductValidation, obtenerProductosProximosAVencer } from '../validations/ProductoValidations.js';
 import { validarCampos } from '../middleware/validarCampos.middleware.js';
 import { verificarToken } from '../middleware/authMiddleware.js';
 import productoController from '../controllers/ProductoController.js';
@@ -61,6 +61,16 @@ router.delete(
   deleteProductValidation,
   validarCampos,
   productoController.eliminarProducto
+);
+
+// ============================================
+// HU-INV-007: Consultar productos próximos a vencer
+// ============================================
+router.get(
+  '/proximos-vencer',
+  obtenerProductosProximosAVencer,
+  validarCampos,
+  productoController.obtenerProductosProximosAVencer
 );
 
 export default router;
