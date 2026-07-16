@@ -91,9 +91,6 @@ class ProductoRepository {
     limite.setDate(limite.getDate() + dias);
     const fechaLimite = limite.toISOString().split("T")[0];
 
-    console.log("Fecha actual:", fechaActual);
-    console.log("Fecha límite:", fechaLimite);
-
     return await Producto.findAll({
         where: {
             fecha_vencimiento: {
@@ -105,7 +102,13 @@ class ProductoRepository {
             as: "categoria"
         }
     });
+
+    //consultas para el inventario de generar reporte
 }
+  async contarProductos() {
+    return await Producto.count();
+  }
+
 }
 
 export default new ProductoRepository();

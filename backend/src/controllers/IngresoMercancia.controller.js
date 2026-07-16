@@ -1,53 +1,78 @@
-import ingresoService from "../services/ingresoMercancia.service.js";
+import IngresoMercanciaService from "../services/IngresoMercancia.service.js";
 
-async function registrarEntrada(req, res) {
-  try {
-    const entrada = await ingresoService.registrarEntrada(req.body);
+class IngresoMercanciaController {
 
-    return res.status(201).json({
-      mensaje: "Entrada de mercancía registrada correctamente",
-      data: entrada,
-    });
+    /**
+     * Registrar una nueva entrada de mercancía
+     */
+    async registrarEntrada(req, res, next) {
 
-  } catch (error) {
-    return res.status(400).json({
-      mensaje: error.message,
-    });
-  }
+        try {
+
+            const entrada = await IngresoMercanciaService.registrarEntrada(req.body);
+
+            return res.status(201).json({
+                success: true,
+                message: "Entrada de mercancía registrada correctamente.",
+                data: entrada
+            });
+
+        } catch (error) {
+            next(error);
+        }
+
+    }
+
+    /**
+     * Obtener una entrada por su ID
+     */
+    async obtenerEntradaPorId(req, res, next) {
+
+        try {
+
+            const { id } = req.params;
+
+            const entrada = await IngresoMercanciaService.obtenerEntrada(id);
+
+            if (!entrada) {
+                return res.status(404).json({
+                    success: false,
+                    message: "La entrada de mercancía no existe."
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: entrada
+            });
+
+        } catch (error) {
+            next(error);
+        }
+
+    }
+
+    /**
+     * Listar todas las entradas de mercancía
+     */
+    async listarEntradas(req, res, next) {
+
+        try {
+
+            const entradas = await IngresoMercanciaService.listarEntradas();
+
+            return res.status(200).json({
+                success: true,
+                total: entradas.length,
+                data: entradas
+            });
+
+        } catch (error) {
+            next(error);
+        }
+
+    }
+
 }
 
-async function obtenerEntrada(req, res) {
-  try {
-    const entrada = await ingresoService.obtenerEntrada(req.params.id);
-
-    return res.status(200).json({
-      data: entrada,
-    });
-
-  } catch (error) {
-    return res.status(404).json({
-      mensaje: error.message,
-    });
-  }
-}
-
-async function listarEntradas(req, res) {
-  try {
-    const entradas = await ingresoService.listarEntradas();
-
-    return res.status(200).json({
-      data: entradas,
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      mensaje: error.message,
-    });
-  }
-}
-
-export default {
-  registrarEntrada,
-  obtenerEntrada,
-  listarEntradas,
-};
+export default new IngresoMercanciaController();

@@ -1,111 +1,145 @@
 import sequelize from "../configuration/database.js";
-import ingresoRepository from "../repositories/ingresoMercancia.repository.js";
+import IngresoMercanciaRepository from "../repositories/IngresoMercancia.repository.js";
 
-/**
- * Registra una entrada de mercancía con sus detalles y actualiza
- * automáticamente el stock de cada producto.
- */
-async function registrarEntrada(payload) {
-  const { codigo_entrada, fecha, observacion, detalles } = payload;
+class IngresoMercanciaService {
 
-  if (!codigo_entrada) {
-    throw new Error("El código de entrada es obligatorio");
-  }
+    /**
+     * Registrar una entrada de mercancía
+     */
+    async registrarEntrada(payload) {
 
-  if (!Array.isArray(detalles) || detalles.length === 0) {
-    throw new Error("Debe incluir al menos un producto en el detalle");
-  }
+        const { codigo_entrada, fecha, observacion, detalles } = payload;
 
-  for (const d of detalles) {
-    if (
-      !d.fk_det_entrada_id_producto ||
-      !d.cantidad ||
-      d.cantidad <= 0 ||
-      d.precio_unitario == null
-    ) {
-      throw new Error(
-        "Cada detalle requiere producto, cantidad (>0) y precio_unitario"
-      );
+        // Validar encabezado
+        if (!codigo_entrada) {
+            throw new Error("El código de entrada es obligatorio.");
+        }
+
+        // Validar detalles
+        if (!Array.isArray(detalles) || detalles.length === 0) {
+            throw new Error("Debe incluir al menos un producto en el detalle.");
+        }
+
+        for (const detalle of detalles) {
+
+            if (
+                !detalle.fk_det_entrada_id_producto ||
+                !detalle.cantidad ||
+                detalle.cantidad <= 0 ||
+                detalle.precio_unitario == null
+            ) {
+                throw new Error(
+                    "Cada detalle requiere producto, cantidad (> 0) y precio_unitario."
+                );
+            }
+
+        }
+
+        return await sequelize.transaction(async (transaction) => {
+
+            // Crear encabezado
+            const entrada = await IngresoMercanciaRepository.crearEntrada(
+                {
+                    codigo_entrada,
+                    fecha: fecha || new Date(),
+                    observacion: observacion || null,
+                    subtotal: 0,
+                    iva: 0,
+                    total: 0
+                },
+                transaction
+            );
+
+            let subtotalGeneral = 0;
+            let ivaGeneral = 0;
+
+            // Registrar detalles
+            for (const detalle of detalles) {
+
+                const porcentajeIVA = detalle.iva ?? 0;
+
+                const subtotalLinea =
+                    Number(detalle.cantidad) *
+                    Number(detalle.precio_unitario);
+
+                const ivaLinea =
+                    subtotalLinea * (Number(porcentajeIVA) / 100);
+
+                const totalLinea =
+                    subtotalLinea + ivaLinea;
+
+                await IngresoMercanciaRepository.crearDetalle(
+                    {
+                        fk_det_entrada_id_entrada: entrada.id_entrada,
+                        fk_det_entrada_id_producto:
+                            detalle.fk_det_entrada_id_producto,
+                        cantidad: detalle.cantidad,
+                        precio_unitario: detalle.precio_unitario,
+                        subtotal: subtotalLinea,
+                        iva: ivaLinea,
+                        total: totalLinea
+                    },
+                    transaction
+                );
+
+                // Actualizar stock
+                await IngresoMercanciaRepository.incrementarStock(
+                    detalle.fk_det_entrada_id_producto,
+                    detalle.cantidad,
+                    transaction
+                );
+
+                subtotalGeneral += subtotalLinea;
+                ivaGeneral += ivaLinea;
+
+            }
+
+            const totalGeneral = subtotalGeneral + ivaGeneral;
+
+            // Actualizar totales
+            await IngresoMercanciaRepository.actualizarTotalesEntrada(
+                entrada.id_entrada,
+                {
+                    subtotal: subtotalGeneral,
+                    iva: ivaGeneral,
+                    total: totalGeneral
+                },
+                transaction
+            );
+
+            // Retornar la entrada con sus detalles
+            return await IngresoMercanciaRepository.obtenerEntradaPorId(
+                entrada.id_entrada
+            );
+
+        });
+
     }
-  }
 
-  return sequelize.transaction(async (t) => {
-    const entrada = await ingresoRepository.crearEntrada(
-      {
-        codigo_entrada,
-        fecha: fecha || new Date(),
-        observacion: observacion || null,
-        subtotal: 0,
-        iva: 0,
-        total: 0,
-      },
-      t
-    );
+    /**
+     * Obtener una entrada por ID
+     */
+    async obtenerEntrada(id_entrada) {
 
-    let subtotalGeneral = 0;
-    let ivaGeneral = 0;
+        const entrada = await IngresoMercanciaRepository.obtenerEntradaPorId(
+            id_entrada
+        );
 
-    for (const d of detalles) {
-      const ivaProducto = d.iva != null ? Number(d.iva) : 0;
-      const subtotalLinea = Number(d.cantidad) * Number(d.precio_unitario);
-      const ivaLinea = subtotalLinea * (ivaProducto / 100);
-      const totalLinea = subtotalLinea + ivaLinea;
+        if (!entrada) {
+            throw new Error("Entrada no encontrada.");
+        }
 
-      await ingresoRepository.crearDetalle(
-        {
-          fk_det_entrada_id_entrada: entrada.id_entrada,
-          fk_det_entrada_id_producto: d.fk_det_entrada_id_producto,
-          cantidad: d.cantidad,
-          precio_unitario: d.precio_unitario,
-          subtotal: subtotalLinea,
-          iva: ivaLinea,
-          total: totalLinea,
-        },
-        t
-      );
+        return entrada;
 
-      await ingresoRepository.incrementarStock(
-        d.fk_det_entrada_id_producto,
-        d.cantidad,
-        t
-      );
-
-      subtotalGeneral += subtotalLinea;
-      ivaGeneral += ivaLinea;
     }
 
-    const totalGeneral = subtotalGeneral + ivaGeneral;
+    /**
+     * Listar todas las entradas
+     */
+    async listarEntradas() {
+        return await IngresoMercanciaRepository.listarEntradas();
+    }
 
-    await ingresoRepository.actualizarTotalesEntrada(
-      entrada.id_entrada,
-      {
-        subtotal: subtotalGeneral,
-        iva: ivaGeneral,
-        total: totalGeneral,
-      },
-      t
-    );
-
-    return ingresoRepository.obtenerEntradaPorId(entrada.id_entrada);
-  });
 }
 
-async function obtenerEntrada(id_entrada) {
-  const entrada = await ingresoRepository.obtenerEntradaPorId(id_entrada);
-
-  if (!entrada) {
-    throw new Error("Entrada no encontrada");
-  }
-
-  return entrada;
-}
-
-async function listarEntradas() {
-  return ingresoRepository.listarEntradas();
-}
-
-export default {
-  registrarEntrada,
-  obtenerEntrada,
-  listarEntradas,
-};
+export default new IngresoMercanciaService();

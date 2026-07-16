@@ -145,5 +145,10 @@ class ProductoService {
     return await productoRepository.obtenerProductosProximosAVencer(dias);
   }
 
+  //generar reporte de inventario
+  async contarProductos() {
+    return await productoRepository.contarProductos();
+  }
+
 }
 export default new ProductoService();

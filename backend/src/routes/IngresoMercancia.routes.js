@@ -1,22 +1,37 @@
 import { Router } from "express";
-import ingresoController from "../controllers/ingresoMercancia.controller.js";
-import { registrarEntradaValidation } from "../validations/ingresoMercancia.validation.js";
+import IngresoMercanciaController from "../controllers/IngresoMercancia.controller.js";
+import { registrarEntradaValidation } from "../validations/IngresoMercancia.validation.js";
 import { validarCampos } from "../middleware/validarCampos.middleware.js";
 
 const router = Router();
 
-// POST /api/ingresos-mercancia
+/**
+ * POST /api/ingreso-mercancia
+ * Registrar una nueva entrada de mercancía
+ */
 router.post(
     "/",
     registrarEntradaValidation,
     validarCampos,
-    ingresoController.registrarEntrada
+    IngresoMercanciaController.registrarEntrada
 );
 
-// GET /api/ingresos-mercancia
-router.get("/", ingresoController.listarEntradas);
+/**
+ * GET /api/ingreso-mercancia
+ * Listar todas las entradas
+ */
+router.get(
+    "/",
+    IngresoMercanciaController.listarEntradas
+);
 
-// GET /api/ingresos-mercancia/:id
-router.get("/:id", ingresoController.obtenerEntrada);
+/**
+ * GET /api/ingreso-mercancia/:id
+ * Obtener una entrada por su ID
+ */
+router.get(
+    "/:id",
+    IngresoMercanciaController.obtenerEntradaPorId
+);
 
 export default router;
