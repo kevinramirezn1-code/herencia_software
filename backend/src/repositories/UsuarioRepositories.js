@@ -21,6 +21,14 @@ class UsuarioRepository {
       include: { model: Rol, as: 'rol' }
     });
   }
+
+  // Actualizar un usuario existente
+  async actualizar(idusuario, datosActualizados) {
+    const usuario = await Usuario.findByPk(idusuario);
+    if (!usuario) return null;
+    return await usuario.update(datosActualizados);
+  }
 }
 
 export default new UsuarioRepository();
+

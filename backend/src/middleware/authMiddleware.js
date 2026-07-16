@@ -42,3 +42,7 @@ export const permitirRoles = (...rolesPermitidos) => {
     next();
   };
 };
+
+// Middleware compuesto para verificar token y asegurar rol Administrador
+export const esAdmin = [verificarToken, permitirRoles('Administrador')];
+

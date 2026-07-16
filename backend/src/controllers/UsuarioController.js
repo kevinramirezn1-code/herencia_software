@@ -33,6 +33,23 @@ class UsuarioController {
       next(error);
     }
   }
+
+  // Actualizar un usuario
+  async updateUsuario(req, res, next) {
+    try {
+      const { id } = req.params;
+      const usuarioActualizado = await usuarioService.actualizarUsuario(id, req.body);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Usuario actualizado exitosamente.',
+        data: usuarioActualizado
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new UsuarioController();
+

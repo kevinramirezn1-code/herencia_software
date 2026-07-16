@@ -82,6 +82,68 @@ class UsuarioService {
       usuario: usuarioFormateado
     };
   }
+
+  // Actualizar un usuario existente
+  async actualizarUsuario(idUsuario, datos) {
+    // 1. Verificar si el usuario existe
+    const usuario = await usuarioRepository.obtenerPorId(idUsuario);
+    if (!usuario) {
+      throw new AppError(`El usuario con id ${idUsuario} no existe.`, 404);
+    }
+
+    // 2. Si se actualiza el rol, verificar que el rol exista
+    if (datos.fk_usuario_id_rol) {
+      const rolExistente = await rolesRepository.obtenerPorId(datos.fk_usuario_id_rol);
+      if (!rolExistente) {
+        throw new AppError(`El rol con id ${datos.fk_usuario_id_rol} no existe.`, 404);
+      }
+    }
+
+    // 3. Si se actualiza el correo, verificar que no esté registrado por otro usuario
+    if (datos.correo_usuario) {
+      const usuarioExistente = await usuarioRepository.obtenerPorCorreo(datos.correo_usuario);
+      if (usuarioExistente && usuarioExistente.idusuario !== parseInt(idUsuario)) {
+        throw new AppError(`El correo '${datos.correo_usuario}' ya está registrado.`, 409);
+      }
+    }
+
+    // 4. Si se actualiza la contraseña, encriptarla
+    if (datos.contraseña_usuario) {
+      const saltRounds = 10;
+      datos.contraseña_usuario = await bcrypt.hash(datos.contraseña_usuario, saltRounds);
+    }
+
+    // 5. Filtrar campos permitidos y preparar objeto para actualizar
+    const camposPermitidos = [
+      'nombre_usuario',
+      'apellido_usuario',
+      'correo_usuario',
+      'contraseña_usuario',
+      'telefono_usuario',
+      'fk_usuario_id_rol'
+    ];
+
+    const datosAActualizar = {};
+    camposPermitidos.forEach(campo => {
+      if (datos[campo] !== undefined) {
+        datosAActualizar[campo] = datos[campo];
+      }
+    });
+
+    // 6. Ejecutar la actualización en el repositorio
+    await usuarioRepository.actualizar(idUsuario, datosAActualizar);
+
+    // 7. Volver a obtener el usuario por ID para asegurar que cargue las relaciones actualizadas (como el rol)
+    const usuarioActualizado = await usuarioRepository.obtenerPorId(idUsuario);
+
+    // 8. Formatear la respuesta del usuario (sin contraseña)
+    const usuarioFormateado = usuarioActualizado.toJSON();
+    delete usuarioFormateado.contraseña_usuario;
+
+    return usuarioFormateado;
+  }
 }
 
 export default new UsuarioService();
+
+
