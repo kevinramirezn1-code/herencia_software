@@ -17,7 +17,7 @@ app.use(express.json());
 // Configurar CORS
 app.use(cors({
     origin: 'http://localhost:5173', // Puerto del frontend
-    methods: 'GET,POST,PUT,DELETE',
+    methods: 'GET,POST,PUT,DELETE,PATCH',
     allowedHeaders: 'Content-Type,Authorization'
 }));
 

@@ -34,16 +34,17 @@ class UsuarioController {
     }
   }
 
-  // Actualizar un usuario
+  // Actualizar usuario
   async updateUsuario(req, res, next) {
     try {
       const { id } = req.params;
-      const usuarioActualizado = await usuarioService.actualizarUsuario(id, req.body);
+      const { rol } = req.body;
+      const usuario = await usuarioService.updateUsuario(id, rol);
 
       return res.status(200).json({
         success: true,
         message: 'Usuario actualizado exitosamente.',
-        data: usuarioActualizado
+        data: usuario
       });
     } catch (error) {
       next(error);
@@ -52,4 +53,3 @@ class UsuarioController {
 }
 
 export default new UsuarioController();
-

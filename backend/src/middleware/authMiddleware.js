@@ -1,33 +1,45 @@
 import jwt from 'jsonwebtoken';
 import AppError from '../utils/AppError.js';
 
-// Middleware para verificar la validez del token JWT
+// Middleware para verificar el token de jsonwebtoken
 export const verificarToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  // Verificar si viene el header de autorización y comienza con "Bearer "
+  // Verificar si viene el header de autorización 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(new AppError('Acceso denegado. No se proporcionó un token válido.', 401));
   }
 
-  // Extraer el token
-  const [, token] = authHeader.split(' ');
+  const token = authHeader.split(' ')[1];
 
   try {
-    // Verificar token con la clave secreta
+    // Verificar token 
     const jwtSecret = process.env.JWT_SECRET || 'secret_key_por_defecto_12345';
     const decoded = jwt.verify(token, jwtSecret);
     
-    // Adjuntar la información del usuario desencriptada en la petición (req)
     req.usuario = decoded;
     
+
     next();
   } catch (error) {
     return next(new AppError('Token inválido o expirado.', 401));
   }
 };
 
-// Middleware para autorizar roles específicos (ej. permitirRoles('Administrador', 'Vendedor'))
+// Middleware para autorizar roles específicos aun no se usara, sera para despues
+//sera como Admin,Encargado,Vendedor
+export const esAdmin = (req, res, next) => {
+  if (!req.usuario) {
+    return next(new AppError('No autenticado.', 401));
+  }
+
+  if (req.usuario.rol !== 'Admin') {
+    return next(new AppError('No tienes permisos para realizar esta acción.', 403));
+  }
+
+  next();
+};  
+
 export const permitirRoles = (...rolesPermitidos) => {
   return (req, res, next) => {
     if (!req.usuario) {
@@ -42,7 +54,3 @@ export const permitirRoles = (...rolesPermitidos) => {
     next();
   };
 };
-
-// Middleware compuesto para verificar token y asegurar rol Administrador
-export const esAdmin = [verificarToken, permitirRoles('Administrador')];
-
