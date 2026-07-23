@@ -8,6 +8,7 @@ import ingresoMercanciaRoutes from "./routes/IngresoMercancia.routes.js";
 import salidaMercanciaRoutes from "./routes/SalidaMercancia.routes.js";
 import NotificacionesRoutes from './routes/NotificacionesRoutes.js';
 import ReporteInventarioRoutes from './routes/ReporteInventarioRoutes.js';
+import ventaRoutes from "./routes/ventaRoutes.js";
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/salida-mercancia', salidaMercanciaRoutes);
 app.use('/api/notificaciones', NotificacionesRoutes);
 app.use('/api/reportes', ReporteInventarioRoutes);
+app.use("/api/ventas", ventaRoutes);
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res) => {

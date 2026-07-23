@@ -19,6 +19,13 @@ class ProductoRepository {
     });
   }
 
+  // Versión liviana de obtenerPorId, sin include de Categoria.
+  // Pensada para validaciones internas (ej. chequeo de stock en transacciones de venta)
+  // donde no se necesita la info de categoría y se busca evitar el JOIN innecesario.
+  async obtenerPorIdSimple(id_producto, options = {}) {
+    return await Producto.findByPk(id_producto, options);
+  }
+
   async obtenerTodos() {
     return await Producto.findAll({
       include: { model: Categoria, as: 'categoria' }
@@ -107,6 +114,8 @@ class ProductoRepository {
 }
   async contarProductos() {
     return await Producto.count();
+
+
   }
 
 }
