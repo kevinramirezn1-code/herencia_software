@@ -3,19 +3,14 @@ import IngresoMercanciaRepository from "../repositories/IngresoMercancia.reposit
 
 class IngresoMercanciaService {
 
-    /**
-     * Registrar una entrada de mercancía
-     */
     async registrarEntrada(payload) {
 
         const { codigo_entrada, fecha, observacion, detalles } = payload;
 
-        // Validar encabezado
         if (!codigo_entrada) {
             throw new Error("El código de entrada es obligatorio.");
         }
 
-        // Validar detalles
         if (!Array.isArray(detalles) || detalles.length === 0) {
             throw new Error("Debe incluir al menos un producto en el detalle.");
         }
@@ -33,11 +28,22 @@ class IngresoMercanciaService {
                 );
             }
 
+            // 🆕 Validación de datos de lote (obligatorios para trazabilidad de alimentos)
+            if (!detalle.numero_lote) {
+                throw new Error(
+                    `El detalle del producto ${detalle.fk_det_entrada_id_producto} requiere un número de lote.`
+                );
+            }
+
+            if (!detalle.fecha_vencimiento) {
+                throw new Error(
+                    `El detalle del producto ${detalle.fk_det_entrada_id_producto} requiere fecha de vencimiento del lote.`
+                );
+            }
         }
 
         return await sequelize.transaction(async (transaction) => {
 
-            // Crear encabezado
             const entrada = await IngresoMercanciaRepository.crearEntrada(
                 {
                     codigo_entrada,
@@ -53,7 +59,6 @@ class IngresoMercanciaService {
             let subtotalGeneral = 0;
             let ivaGeneral = 0;
 
-            // Registrar detalles
             for (const detalle of detalles) {
 
                 const porcentajeIVA = detalle.iva ?? 0;
@@ -68,7 +73,7 @@ class IngresoMercanciaService {
                 const totalLinea =
                     subtotalLinea + ivaLinea;
 
-                await IngresoMercanciaRepository.crearDetalle(
+                const detIngreso = await IngresoMercanciaRepository.crearDetalle(
                     {
                         fk_det_entrada_id_entrada: entrada.id_entrada,
                         fk_det_entrada_id_producto:
@@ -82,7 +87,20 @@ class IngresoMercanciaService {
                     transaction
                 );
 
-                // Actualizar stock
+                // 🆕 Crear el lote correspondiente a esta línea de entrada
+                await IngresoMercanciaRepository.crearLoteDeIngreso(
+                    {
+                        fk_lote_id_producto: detalle.fk_det_entrada_id_producto,
+                        numero_lote: detalle.numero_lote,
+                        cantidad_inicial: detalle.cantidad,
+                        fecha_produccion: detalle.fecha_produccion || null,
+                        fecha_vencimiento: detalle.fecha_vencimiento,
+                        fk_lote_id_ingreso: detIngreso.id_det_entrada
+                    },
+                    transaction
+                );
+
+                // Actualizar stock (caché sincronizado del total)
                 await IngresoMercanciaRepository.incrementarStock(
                     detalle.fk_det_entrada_id_producto,
                     detalle.cantidad,
@@ -91,12 +109,10 @@ class IngresoMercanciaService {
 
                 subtotalGeneral += subtotalLinea;
                 ivaGeneral += ivaLinea;
-
             }
 
             const totalGeneral = subtotalGeneral + ivaGeneral;
 
-            // Actualizar totales
             await IngresoMercanciaRepository.actualizarTotalesEntrada(
                 entrada.id_entrada,
                 {
@@ -107,39 +123,25 @@ class IngresoMercanciaService {
                 transaction
             );
 
-            // Retornar la entrada con sus detalles
             return await IngresoMercanciaRepository.obtenerEntradaPorId(
                 entrada.id_entrada
             );
-
         });
-
     }
 
-    /**
-     * Obtener una entrada por ID
-     */
     async obtenerEntrada(id_entrada) {
-
-        const entrada = await IngresoMercanciaRepository.obtenerEntradaPorId(
-            id_entrada
-        );
+        const entrada = await IngresoMercanciaRepository.obtenerEntradaPorId(id_entrada);
 
         if (!entrada) {
             throw new Error("Entrada no encontrada.");
         }
 
         return entrada;
-
     }
 
-    /**
-     * Listar todas las entradas
-     */
     async listarEntradas() {
         return await IngresoMercanciaRepository.listarEntradas();
     }
-
 }
 
 export default new IngresoMercanciaService();

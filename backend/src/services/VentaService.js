@@ -1,7 +1,9 @@
 import sequelize from "../configuration/database.js";
 import VentaRepository from "../repositories/VentaRepositories.js";
 import DetVentaRepository from "../repositories/DetVentaRepository.js";
+import DetVentaLoteRepository from "../repositories/DetVentaLoteRepository.js";
 import ProductoRepository from "../repositories/ProductoRepositories.js";
+import LoteRepository from "../repositories/LoteRepository.js";
 
 class VentaService {
 
@@ -24,8 +26,8 @@ class VentaService {
     }
 
     async crearVentaCompleta(datosVenta, detallesProductos) {
-        // detallesProductos ahora solo necesita: [{ fk_det_venta_id_producto, cantidad }]
-        // El precio y el IVA ya NO se reciben del frontend, se toman del producto en BD
+        // detallesProductos solo necesita: [{ fk_det_venta_id_producto, cantidad }]
+        // El precio y el IVA se toman del producto en BD, nunca del body
 
         if (!detallesProductos || detallesProductos.length === 0) {
             throw new Error("La venta debe contener al menos un producto");
@@ -45,7 +47,7 @@ class VentaService {
                     throw new Error(`Cantidad inválida para el producto ${fk_det_venta_id_producto}`);
                 }
 
-                // Bloqueo de fila para evitar condiciones de carrera en stock
+                // Bloqueo de fila para evitar condiciones de carrera
                 const producto = await ProductoRepository.obtenerPorIdSimple(fk_det_venta_id_producto, {
                     transaction,
                     lock: transaction.LOCK.UPDATE
@@ -55,9 +57,12 @@ class VentaService {
                     throw new Error(`Producto con id ${fk_det_venta_id_producto} no existe`);
                 }
 
-                if (producto.stock < cantidad) {
+                // 🆕 El stock disponible real ahora se valida sumando los lotes, no producto.stock directo
+                const stockDisponible = await LoteRepository.obtenerStockTotalPorProducto(fk_det_venta_id_producto);
+
+                if (stockDisponible < cantidad) {
                     throw new Error(
-                        `Stock insuficiente para "${producto.nombre_producto}". Disponible: ${producto.stock}, solicitado: ${cantidad}`
+                        `Stock insuficiente para "${producto.nombre_producto}". Disponible: ${stockDisponible}, solicitado: ${cantidad}`
                     );
                 }
 
@@ -101,14 +106,36 @@ class VentaService {
                 transaction
             );
 
-            const detallesConVenta = detallesCalculados.map((detalle) => ({
-                ...detalle,
-                fk_det_venta_id_venta: nuevaVenta.id_venta
-            }));
-
-            await DetVentaRepository.crearVarios(detallesConVenta, transaction);
-
+            // 🆕 Se crea cada detalle INDIVIDUALMENTE (ya no bulkCreate) porque
+            // necesitamos el id_detalleventa de cada línea para vincular sus lotes
             for (const detalle of detallesCalculados) {
+
+                const detVentaCreado = await DetVentaRepository.creardatos(
+                    {
+                        ...detalle,
+                        fk_det_venta_id_venta: nuevaVenta.id_venta
+                    },
+                    transaction
+                );
+
+                // 🆕 Consume stock de los lotes más próximos a vencer (FEFO),
+                // repartiendo entre varios lotes si es necesario
+                const consumoPorLote = await LoteRepository.consumirStockFEFO(
+                    detalle.fk_det_venta_id_producto,
+                    detalle.cantidad,
+                    transaction
+                );
+
+                // 🆕 Registra de qué lote(s) exactos salió esta línea de venta (trazabilidad)
+                const registrosLote = consumoPorLote.map((c) => ({
+                    fk_det_venta_lote_id_detalleventa: detVentaCreado.id_detalleventa,
+                    fk_det_venta_lote_id_lote: c.id_lote,
+                    cantidad_tomada: c.cantidad_tomada
+                }));
+
+                await DetVentaLoteRepository.crearVarios(registrosLote, transaction);
+
+                // Se mantiene producto.stock sincronizado como caché del total
                 await ProductoRepository.decrementarStock(
                     detalle.fk_det_venta_id_producto,
                     detalle.cantidad,

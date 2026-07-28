@@ -7,6 +7,10 @@ import Venta from "./VentaModel.js";
 import DetVenta from "./DetVentaModel.js";
 import Cliente from "./ClienteModel.js";
 import Usuario from "./UsuariosModels.js";
+import Proveedor from "./ProovedorModel.js";
+import ProductoProveedor from "./Producto-ProovedorModel.js";
+import Lote from "./loteModel.js";
+import DetVentaLote from "./DetVentaLoteModel.js";
 
 // --- Relaciones: Ingreso <-> Detalle ---
 IngresoMercancia.hasMany(DetIngreso, {
@@ -94,6 +98,41 @@ Usuario.hasMany(Venta, {
   as: "ventas",
 });
 
+// --- Relación: Proveedor <-> ProductoProveedor ---
+Proveedor.hasMany(ProductoProveedor, {
+  foreignKey: "fk_producto_proveedor_id_proveedor",
+  as: "productos_proveedor",
+});
+
+ProductoProveedor.belongsTo(Proveedor, {
+  foreignKey: "fk_producto_proveedor_id_proveedor",
+  as: "proveedor",
+});
+
+// --- Relación: Producto <-> ProductoProveedor ---
+Producto.hasMany(ProductoProveedor, {
+  foreignKey: "fk_producto_proveedor_id_producto",
+  as: "proveedores_producto",
+});
+
+ProductoProveedor.belongsTo(Producto, {
+  foreignKey: "fk_producto_proveedor_id_producto",
+  as: "producto",
+});
+
+// Relación: un producto tiene muchos lotes, cada lote pertenece a un producto
+Lote.belongsTo(Producto, { foreignKey: 'fk_lote_id_producto', as: 'producto' });
+Producto.hasMany(Lote, { foreignKey: 'fk_lote_id_producto', as: 'lotes' });
+
+//relaciones lotes con detalle venta
+
+DetVenta.hasMany(DetVentaLote, { foreignKey: 'fk_det_venta_lote_id_detalleventa', as: 'lotes_consumidos' });
+DetVentaLote.belongsTo(DetVenta, { foreignKey: 'fk_det_venta_lote_id_detalleventa', as: 'detalle_venta' });
+
+Lote.hasMany(DetVentaLote, { foreignKey: 'fk_det_venta_lote_id_lote', as: 'ventas' });
+DetVentaLote.belongsTo(Lote, { foreignKey: 'fk_det_venta_lote_id_lote', as: 'lote' });
+
+
 export {
   IngresoMercancia,
   DetIngreso,
@@ -104,4 +143,8 @@ export {
   DetVenta,
   Cliente,
   Usuario,
+  Proveedor,
+  ProductoProveedor,
+  Lote,
+  DetVentaLote,
 };

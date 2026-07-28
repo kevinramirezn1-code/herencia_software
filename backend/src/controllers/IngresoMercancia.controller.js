@@ -6,21 +6,13 @@ class IngresoMercanciaController {
      * Registrar una nueva entrada de mercancía
      */
     async registrarEntrada(req, res, next) {
-
-        try {
-
-            const entrada = await IngresoMercanciaService.registrarEntrada(req.body);
-
-            return res.status(201).json({
-                success: true,
-                message: "Entrada de mercancía registrada correctamente.",
-                data: entrada
-            });
-
-        } catch (error) {
-            next(error);
-        }
-
+    try {
+        const entrada = await IngresoMercanciaService.registrarEntrada(req.body);
+        return res.status(201).json({ success: true, data: entrada });
+    } catch (error) {
+        console.log("DETALLE DEL ERROR:", error.errors); // 👈 agrega esta línea
+        next(error);
+    }
     }
 
     /**

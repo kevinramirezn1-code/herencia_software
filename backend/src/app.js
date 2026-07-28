@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from "cors";
 import "./models/associations-ingreso.js"; // fuerza el registro de relaciones antes de cualquier ruta
-
+import proveedorRoutes from "./routes/proveedorRoutes.js";
 import productoRoutes from './routes/ProductoRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import ingresoMercanciaRoutes from "./routes/IngresoMercancia.routes.js";
@@ -30,6 +30,7 @@ app.use('/api/salida-mercancia', salidaMercanciaRoutes);
 app.use('/api/notificaciones', NotificacionesRoutes);
 app.use('/api/reportes', ReporteInventarioRoutes);
 app.use("/api/ventas", ventaRoutes);
+app.use("/api/proveedores", proveedorRoutes);
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res) => {
