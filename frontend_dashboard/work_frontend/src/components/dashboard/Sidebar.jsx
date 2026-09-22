@@ -25,14 +25,12 @@ export function Sidebar({ collapsed, onCollapse }) {
       }`}
       style={{ background: "var(--sidebar)", borderRight: "1px solid var(--sidebar-border)" }}
     >
-      {/* Marca */ }
-
-      /*
+      {/* Marca */}
       <div
         className="flex items-center gap-3 px-4 py-5 border-b"
         style={{ borderColor: "var(--sidebar-border)" }}
       >
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold shadow-sm">
           HP
         </div>
         {!collapsed && (
@@ -40,7 +38,7 @@ export function Sidebar({ collapsed, onCollapse }) {
             <p className="text-white text-sm font-semibold leading-tight truncate">
               Herencia de Papá
             </p>
-            <p className="text-xs leading-tight" style={{ color: "var(--sidebar-foreground)" }}>
+            <p className="text-[11px] leading-tight text-slate-400">
               Sistema ERP
             </p>
           </div>

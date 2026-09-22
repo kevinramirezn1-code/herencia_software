@@ -7,7 +7,7 @@ const Proveedor = sequelize.define('Proveedor', {
         primaryKey: true,
         allowNull: false,
         autoIncrement: true,
-        field: 'id_proveedores'
+        field: 'id_proovedores'
     },
     nit: {
         type: DataTypes.STRING(45),
@@ -27,7 +27,7 @@ const Proveedor = sequelize.define('Proveedor', {
     direccion: {
         type: DataTypes.STRING(45),
         allowNull: false,
-        field: 'direccion'
+        field: 'dirreccion'
     },
     ciudad: {
         type: DataTypes.STRING(45),
@@ -35,7 +35,7 @@ const Proveedor = sequelize.define('Proveedor', {
         field: 'ciudad'
     }
 }, {
-    tableName: 'proveedores',
+    tableName: 'proovedores',
     timestamps: false,
     paranoid: true,
     deletedAt: 'deleted_at'

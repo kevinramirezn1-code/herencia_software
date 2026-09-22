@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import Lote from "../models/LoteModel.js";
+import Lote from "../models/loteModel.js";
 
 class LoteRepository {
 

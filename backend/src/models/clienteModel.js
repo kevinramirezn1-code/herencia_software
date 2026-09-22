@@ -36,7 +36,7 @@ const Cliente = sequelize.define('Cliente', {
     direccion_cliente: {
         type: DataTypes.STRING(255),
         allowNull: true,
-        field: 'direccion_clientes' // una sola "r", sin el typo que asumí antes
+        field: 'dirreccion_clientes'
     },
     ciudad_cliente: {
         type: DataTypes.STRING(45),

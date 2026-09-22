@@ -5,7 +5,7 @@ import DetlSalida from "./DetlSalidaModel.js";
 import Producto from "./ProductModels.js";
 import Venta from "./VentaModel.js";
 import DetVenta from "./DetVentaModel.js";
-import Cliente from "./ClienteModel.js";
+import Cliente from "./clienteModel.js";
 import Usuario from "./UsuariosModels.js";
 import Proveedor from "./ProovedorModel.js";
 import ProductoProveedor from "./Producto-ProovedorModel.js";

@@ -28,6 +28,16 @@ export function AuthProvider({ children }) {
         return respuesta;
     };
 
+    const registrar = async (datosUsuario) => {
+        const respuesta = await authService.registrar(datosUsuario);
+
+        localStorage.setItem("token", respuesta.token);
+        localStorage.setItem("usuario", JSON.stringify(respuesta.data));
+        setUsuario(respuesta.data);
+
+        return respuesta;
+    };
+
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
@@ -35,7 +45,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ usuario, login, logout, cargando }}>
+        <AuthContext.Provider value={{ usuario, login, registrar, logout, cargando }}>
             {children}
         </AuthContext.Provider>
     );
