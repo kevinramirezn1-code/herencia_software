@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/image copy.png';
 import './AuthModal.css';
 
 export default function AuthModal({ onCerrar }) {
-  const [isLogin, setIsLogin] = useState(true);
+  const [view, setView] = useState('login'); // 'login' | 'register' | 'recovery'
   const [cargando, setCargando] = useState(false);
+  const [cargandoRecuperar, setCargandoRecuperar] = useState(false);
+  const [mensajeExitoRecuperar, setMensajeExitoRecuperar] = useState("");
   const [error, setError] = useState(null);
 
   const { login, registrar } = useAuth();
@@ -15,6 +18,9 @@ export default function AuthModal({ onCerrar }) {
   // Estados de Login
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
+
+  // Estado de Recuperar
+  const [recuperarEmail, setRecuperarEmail] = useState("");
 
   // Estados de Registro
   const [nombre, setNombre] = useState("");
@@ -25,8 +31,9 @@ export default function AuthModal({ onCerrar }) {
   const [rol, setRol] = useState("1");
 
   const toggleView = () => {
-    setIsLogin(!isLogin);
+    setView((prev) => (prev === 'login' ? 'register' : 'login'));
     setError(null);
+    setMensajeExitoRecuperar("");
   };
 
   const handleLoginSubmit = async (e) => {
@@ -66,6 +73,19 @@ export default function AuthModal({ onCerrar }) {
     }
   };
 
+  const handleRecuperarSubmit = (e) => {
+    e.preventDefault();
+    if (!recuperarEmail.trim()) return;
+    setError(null);
+    setMensajeExitoRecuperar("");
+    setCargandoRecuperar(true);
+
+    setTimeout(() => {
+      setCargandoRecuperar(false);
+      setMensajeExitoRecuperar("el codigo a sido enviado correctamente");
+    }, 1500);
+  };
+
   return (
     <div className="auth-page-wrapper">
       <div className="auth-card">
@@ -78,12 +98,18 @@ export default function AuthModal({ onCerrar }) {
         {/* HEADER */}
         <div className="auth-header">
           <h2 className="auth-title">
-            {isLogin ? 'INICIAR SESIÓN' : 'REGISTRARSE'}
+            {view === 'login'
+              ? 'INICIAR SESIÓN'
+              : view === 'register'
+              ? 'REGISTRARSE'
+              : 'RECUPERAR CONTRASEÑA'}
           </h2>
           <p className="auth-description">
-            {isLogin
+            {view === 'login'
               ? 'Ingresa tu correo y contraseña para continuar.'
-              : 'Completa tus datos para crear una nueva cuenta.'}
+              : view === 'register'
+              ? 'Completa tus datos para crear una nueva cuenta.'
+              : 'Ingresa tu correo para recibir el código de verificación.'}
           </p>
         </div>
 
@@ -93,7 +119,7 @@ export default function AuthModal({ onCerrar }) {
           </div>
         )}
 
-        {isLogin ? (
+        {view === 'login' ? (
           /* FORMULARIO DE INICIO DE SESIÓN */
           <form className="auth-form" onSubmit={handleLoginSubmit}>
             <div className="auth-fields-container">
@@ -120,6 +146,20 @@ export default function AuthModal({ onCerrar }) {
                   required
                 />
               </div>
+
+              <div style={{ textAlign: "right", marginTop: "-6px" }}>
+                <button
+                  type="button"
+                  className="auth-link-btn"
+                  onClick={() => {
+                    setView('recovery');
+                    setError(null);
+                    setMensajeExitoRecuperar("");
+                  }}
+                >
+                  recuperar contraseña
+                </button>
+              </div>
             </div>
 
             <button type="submit" className="auth-submit-btn" disabled={cargando}>
@@ -130,6 +170,54 @@ export default function AuthModal({ onCerrar }) {
               ¿No tienes una cuenta?
               <button type="button" className="auth-toggle-btn" onClick={toggleView}>
                 Regístrate
+              </button>
+            </div>
+          </form>
+        ) : view === 'recovery' ? (
+          /* FORMULARIO DE RECUPERAR CONTRASEÑA */
+          <form className="auth-form" onSubmit={handleRecuperarSubmit}>
+            <div className="auth-fields-container">
+              <div className="auth-field">
+                <label className="auth-label">Correo electrónico</label>
+                <input
+                  type="email"
+                  placeholder="ejemplo@correo.com"
+                  className="auth-input"
+                  value={recuperarEmail}
+                  onChange={(e) => {
+                    setRecuperarEmail(e.target.value);
+                    if (mensajeExitoRecuperar) setMensajeExitoRecuperar("");
+                  }}
+                  required
+                />
+                {mensajeExitoRecuperar && (
+                  <p className="auth-success-msg">
+                    {mensajeExitoRecuperar}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <button type="submit" className="auth-submit-btn" disabled={cargandoRecuperar}>
+              {cargandoRecuperar ? (
+                <Loader2 className="auth-spinner animate-spin" size={18} />
+              ) : (
+                "enviar codigo de verificacion"
+              )}
+            </button>
+
+            <div className="auth-footer">
+              <button
+                type="button"
+                className="auth-toggle-btn"
+                onClick={() => {
+                  setView('login');
+                  setError(null);
+                  setMensajeExitoRecuperar("");
+                  setRecuperarEmail("");
+                }}
+              >
+                Volver al inicio de sesión
               </button>
             </div>
           </form>

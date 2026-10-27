@@ -15,12 +15,18 @@
     padding: 0 32px;
 }
 
+.home__bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .home__login-btn {
     background: #1a1a1a;
     color: #ffffff;
     border: none;
     border-radius: 999px;
-    padding: 10px 28px;
+    padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
@@ -31,11 +37,28 @@
     background: #333333;
 }
 
+.home__register-btn {
+    background: #7a1f3d;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.home__register-btn:hover {
+    background: #611831;
+}
+
 .home__content {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 24px 16px;
 }
 
 /* --- Marca (pantalla inicial) --- */
@@ -66,7 +89,7 @@
     color: #999999;
 }
 
-/* --- Panel de login --- */
+/* --- Panel de login y registro --- */
 .login-panel {
     width: 320px;
     background: #b9838f;
@@ -74,7 +97,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 22px;
+    gap: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .login-panel__wordmark {
@@ -93,6 +118,28 @@
     letter-spacing: 0.5px;
 }
 
+.login-panel__header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.login-panel__title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.login-panel__subtitle {
+    margin: 0;
+    font-size: 12px;
+    color: #f7e8eb;
+    line-height: 1.4;
+}
+
 .login-panel__form {
     width: 100%;
     display: flex;
@@ -100,20 +147,63 @@
     gap: 14px;
 }
 
+/* --- Inputs con fuente blanca para alto contraste --- */
 .login-panel__input {
     width: 100%;
     box-sizing: border-box;
-    border: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
     border-radius: 999px;
     padding: 12px 18px;
     font-family: "Inter", sans-serif;
     font-size: 14px;
-    color: #333333;
+    color: #ffffff !important;
+    background: rgba(122, 31, 61, 0.45);
     outline: none;
+    transition: all 0.2s ease;
+}
+
+.login-panel__input:focus {
+    border-color: #ffffff;
+    background: rgba(122, 31, 61, 0.65);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 .login-panel__input::placeholder {
-    color: #aaaaaa;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.login-panel__input:-webkit-autofill,
+.login-panel__input:-webkit-autofill:hover, 
+.login-panel__input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0px 1000px #681832 inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.login-panel__select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: #ffffff !important;
+    background: rgba(122, 31, 61, 0.45);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.login-panel__select:focus {
+    border-color: #ffffff;
+    background: rgba(122, 31, 61, 0.65);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.login-panel__select option {
+    background-color: #7a1f3d;
+    color: #ffffff;
 }
 
 .login-panel__submit {
@@ -126,6 +216,10 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
 }
 
 .login-panel__submit:hover:not(:disabled) {
@@ -133,8 +227,24 @@
 }
 
 .login-panel__submit:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
+}
+
+.login-panel__forgot {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+    opacity: 0.9;
+    padding: 2px 0;
+    transition: opacity 0.2s ease;
+}
+
+.login-panel__forgot:hover {
+    opacity: 1;
 }
 
 .login-panel__back {
@@ -155,4 +265,28 @@
     border-radius: 8px;
     text-align: center;
     margin: 0;
+}
+
+.login-panel__success {
+    background: #ffffff;
+    color: #16a34a;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 0;
+}
+
+.login-panel__spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

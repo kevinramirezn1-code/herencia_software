@@ -145,11 +145,48 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
 }
 
-.auth-submit-btn:hover {
+.auth-submit-btn:hover:not(:disabled) {
   background-color: #333333;
   border-color: #333333;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: #666666;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 2px 0;
+  transition: color 0.2s ease;
+}
+
+.auth-link-btn:hover {
+  color: #000000;
+}
+
+.auth-success-msg {
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 6px 0 0 0;
+  text-align: center;
+}
+
+.auth-spinner {
+  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 
 .auth-footer {
@@ -172,4 +209,13 @@
 
 .auth-toggle-btn:hover {
   text-decoration: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -1,0 +1,10 @@
+{
+  "name": "frontend-dashboard",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix work_frontend install",
+    "dev": "npm --prefix work_frontend run dev",
+    "build": "npm --prefix work_frontend run build",
+    "preview": "npm --prefix work_frontend run preview"
+  }
+}

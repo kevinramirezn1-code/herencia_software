@@ -1,17 +1,31 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "./Home.css";
 
 function Home() {
     const [mostrarLogin, setMostrarLogin] = useState(false);
+    const [modoRecuperar, setModoRecuperar] = useState(false);
     const [correo_usuario, setCorreo] = useState("");
     const [contraseña_usuario, setContraseña] = useState("");
+    const [correoRecuperar, setCorreoRecuperar] = useState("");
+    const [cargandoRecuperar, setCargandoRecuperar] = useState(false);
+    const [mensajeExitoRecuperar, setMensajeExitoRecuperar] = useState("");
     const [error, setError] = useState(null);
     const [cargando, setCargando] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get("login") === "true") {
+            setMostrarLogin(true);
+            setModoRecuperar(false);
+        }
+    }, [location.search]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,17 +42,59 @@ function Home() {
         }
     };
 
+    const handleRecuperarSubmit = (e) => {
+        e.preventDefault();
+        if (!correoRecuperar.trim()) return;
+        setMensajeExitoRecuperar("");
+        setCargandoRecuperar(true);
+
+        setTimeout(() => {
+            setCargandoRecuperar(false);
+            setMensajeExitoRecuperar("el codigo a sido enviado correctamente");
+        }, 1500);
+    };
+
+    const handleAbrirRecuperar = () => {
+        setModoRecuperar(true);
+        setError(null);
+        setMensajeExitoRecuperar("");
+    };
+
+    const handleVolverALogin = () => {
+        setModoRecuperar(false);
+        setMensajeExitoRecuperar("");
+        setCorreoRecuperar("");
+        setError(null);
+    };
+
+    const handleCerrarLogin = () => {
+        setMostrarLogin(false);
+        setModoRecuperar(false);
+        setMensajeExitoRecuperar("");
+        setCorreoRecuperar("");
+        setError(null);
+    };
+
     return (
         <div className="home">
             <header className="home__bar">
-                {!mostrarLogin && (
+                <div className="home__bar-actions">
                     <button
                         className="home__login-btn"
-                        onClick={() => setMostrarLogin(true)}
+                        onClick={() => {
+                            setModoRecuperar(false);
+                            setMostrarLogin(true);
+                        }}
                     >
                         Login
                     </button>
-                )}
+                    <button
+                        className="home__register-btn"
+                        onClick={() => navigate("/register")}
+                    >
+                        ¡registrate aqui!
+                    </button>
+                </div>
             </header>
 
             <main className="home__content">
@@ -48,6 +104,57 @@ function Home() {
                             <h1 className="brand__title">Herencia de Papá</h1>
                         </div>
                         <p className="brand__slogan">Est. 2010</p>
+                    </div>
+                ) : modoRecuperar ? (
+                    <div className="login-panel">
+                        <div className="login-panel__wordmark">
+                            <span>Herencia de Papá</span>
+                        </div>
+
+                        <div className="login-panel__header">
+                            <h2 className="login-panel__title">Recuperar contraseña</h2>
+                            <p className="login-panel__subtitle">Ingresa tu correo para recibir el código de verificación</p>
+                        </div>
+
+                        <form className="login-panel__form" onSubmit={handleRecuperarSubmit}>
+                            <input
+                                type="email"
+                                className="login-panel__input"
+                                placeholder="correo electrónico"
+                                value={correoRecuperar}
+                                onChange={(e) => {
+                                    setCorreoRecuperar(e.target.value);
+                                    if (mensajeExitoRecuperar) setMensajeExitoRecuperar("");
+                                }}
+                                required
+                            />
+
+                            {mensajeExitoRecuperar && (
+                                <p className="login-panel__success">
+                                    {mensajeExitoRecuperar}
+                                </p>
+                            )}
+
+                            <button
+                                type="submit"
+                                className="login-panel__submit"
+                                disabled={cargandoRecuperar}
+                            >
+                                {cargandoRecuperar ? (
+                                    <Loader2 className="login-panel__spinner animate-spin" size={20} />
+                                ) : (
+                                    "enviar codigo de verificacion"
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                className="login-panel__back"
+                                onClick={handleVolverALogin}
+                            >
+                                Volver
+                            </button>
+                        </form>
                     </div>
                 ) : (
                     <div className="login-panel">
@@ -86,8 +193,25 @@ function Home() {
 
                             <button
                                 type="button"
+                                className="login-panel__forgot"
+                                onClick={handleAbrirRecuperar}
+                            >
+                                recuperar contraseña
+                            </button>
+
+                            <button
+                                type="button"
+                                className="login-panel__forgot"
+                                onClick={() => navigate("/register")}
+                                style={{ marginTop: "-6px" }}
+                            >
+                                ¿No tienes cuenta? ¡registrate aqui!
+                            </button>
+
+                            <button
+                                type="button"
                                 className="login-panel__back"
-                                onClick={() => setMostrarLogin(false)}
+                                onClick={handleCerrarLogin}
                             >
                                 Volver
                             </button>
